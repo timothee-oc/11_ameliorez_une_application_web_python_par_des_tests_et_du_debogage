@@ -1,19 +1,26 @@
 import pytest
-from server import clubs, app
+from server import app
+from unittest.mock import patch
+
+@pytest.fixture
+def clubs():
+    clubs = [{"email": "CLUB1@mail.com"}]
+    with patch('server.clubs', clubs) as mock:
+        yield mock
 
 @pytest.fixture
 def client():
     with app.test_client() as client:
         yield client
 
-def test_login_valid_email(client):
+def test_login_valid_email(client, clubs):
     valid_email = clubs[0]["email"]
     response = client.post("/showSummary", data={"email": valid_email})
 
     assert response.status_code == 200
     assert b"Summary" in response.data
 
-def test_login_invalid_email(client):
+def test_login_invalid_email(client, clubs):
     invalid_email = "invalid_email"
     response = client.post("/showSummary", data={"email": invalid_email}, follow_redirects=True)
 

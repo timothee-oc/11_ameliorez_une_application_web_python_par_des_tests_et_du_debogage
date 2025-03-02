@@ -49,8 +49,15 @@ def book(competition,club):
 def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
+
     placesRequired = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
+    club_points = int(club['points'])
+    if placesRequired > club_points:
+        flash("You cannot redeem more points than you have.")
+        return redirect(url_for('book', competition=competition['name'], club=club['name']))
+    
+    club['points'] = club_points - placesRequired
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
 

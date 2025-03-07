@@ -1,0 +1,35 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Points Board || GUDLFT</title>
+    <style>
+        table {
+            width: 200px;
+            text-align: center;
+            border-collapse: collapse;
+        }
+        td, th{
+            border: black solid 1px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Points Board</h2>
+
+    <table>
+        <thead>
+            <th>Name</th>
+            <th>Points</th>
+        </thead>
+        <tbody>
+            {% for club in clubs %}
+                <tr>
+                    <td>{{ club['name'] }}</td>
+                    <td>{{ club['points'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

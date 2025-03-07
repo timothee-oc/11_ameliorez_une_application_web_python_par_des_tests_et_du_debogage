@@ -7,6 +7,8 @@
 <body>
     <h1>Welcome to the GUDLFT Registration Portal!</h1>
 
+    <a href="{{ url_for('points_board') }}">Points Board</a>
+
     <p>Please enter your secretary email to continue:</p>
 
     <form action="showSummary" method="post">
@@ -24,6 +26,5 @@
             </ul>
         {% endif %}
     {% endwith %}
-
 </body>
 </html>

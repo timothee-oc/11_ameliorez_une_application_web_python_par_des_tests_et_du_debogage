@@ -80,3 +80,8 @@ class TestBook:
         response = client.get(f'/book/{competition['name']}/{clubs[0]['name']}')
         assert response.status_code == 200
         assert b"You cannot book on a past competition." in response.data
+
+class TestPointsBoard:
+    def test_points_board(self, client, clubs, competitions):
+        response = client.get('/points_board')
+        assert response.status_code == 200

@@ -52,6 +52,11 @@ def purchasePlaces():
 
     placesRequired = int(request.form['places'])
     club_points = int(club['points'])
+
+    if placesRequired > 12:
+        flash("You cannot redeem more than 12 points.")
+        return redirect(url_for('book', competition=competition['name'], club=club['name']))
+
     if placesRequired > club_points:
         flash("You cannot redeem more points than you have.")
         return redirect(url_for('book', competition=competition['name'], club=club['name']))

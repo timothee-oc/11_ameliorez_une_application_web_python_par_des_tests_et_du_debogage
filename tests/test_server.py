@@ -14,6 +14,12 @@ def clubs():
     with patch('server.clubs', clubs) as mock:
         yield mock
 
+@pytest.fixture
+def competitions():
+    competitions = [{'name': 'comp', "date": "1111-11-11 11:11:11", "numberOfPlaces": "15"}]
+    with patch('server.competitions', competitions) as mock:
+        yield mock
+
 class TestShowSummary:
     route = '/showSummary'
 
@@ -27,18 +33,32 @@ class TestShowSummary:
         assert response.status_code == 200
         assert b"Sorry, that email wasn't found." in response.data
 
-@patch('server.competitions', [{'name': 'COMP', 'numberOfPlaces': '15'}])
 class TestPurchasePlaces:
     route = '/purchasePlaces'
 
-    def test_can_purchase_club_points_amount(self, client, clubs):
-        response = client.post(self.route, data={'competition': 'COMP', 'club': clubs[0]['name'], 'places': '10'})
+    def test_can_purchase_respect_all_criteria(self, client, clubs, competitions):
+        club = clubs[0]
+        competition = competitions[0]
+        response = client.post(self.route, data={'competition': competition['name'], 'club': club['name'], 'places': '10'})
         assert response.status_code == 200
         assert b"Great-booking complete!" in response.data
-        assert clubs[0]['points'] == 0
+        assert club['points'] == 0
+        assert competition['numberOfPlaces'] == 5
     
-    def test_cannot_purchase_more_than_club_points(self, client, clubs):
-        response = client.post(self.route, data={'competition': 'COMP', 'club': clubs[0]['name'], 'places': '11'}, follow_redirects=True)
+    def test_cannot_purchase_more_than_club_points(self, client, clubs, competitions):
+        club = clubs[0]
+        competition = competitions[0]
+        response = client.post(self.route, data={'competition': competition['name'], 'club': club['name'], 'places': '11'}, follow_redirects=True)
         assert response.status_code == 200
         assert b"You cannot redeem more points than you have." in response.data
+        assert int(club['points']) == 10
+        assert int(competition['numberOfPlaces']) == 15
+    
+    def test_cannot_purchase_more_than_12_points(self, client, clubs, competitions):
+        club = clubs[0]
+        competition = competitions[0]
+        response = client.post(self.route, data={'competition': competition['name'], 'club': club['name'], 'places': '13'}, follow_redirects=True)
+        assert response.status_code == 200
+        assert b"You cannot redeem more than 12 points." in response.data
         assert int(clubs[0]['points']) == 10
+        assert int(competition['numberOfPlaces']) == 15

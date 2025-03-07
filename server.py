@@ -60,32 +60,43 @@ def book(competition, club):
 
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
-
-    places_required = int(request.form['places'])
-    club_points = int(club['points'])
-    number_of_places = int(competition['numberOfPlaces'])
+    try:
+        name = request.form['club']
+        club = [c for c in clubs if c['name'] == name][0]
+    except IndexError:
+        flash(f"Your club {name} does not exist. Please log in.")
+        return redirect(url_for('index'))
 
     now = datetime.now().strftime(DATE_FORMAT)
+    try:
+        name = request.form['competition']
+        competition = [c for c in competitions if c['name'] == name][0]
+    except IndexError:
+        flash(f"The competition {name} does not exist.")
+        return render_template('welcome.html', club=club, competitions=competitions, now=now)
+
     if competition['date'] <= now:
         flash("You cannot book on a past competition.")
         return render_template('welcome.html', club=club, competitions=competitions, now=now)
-    
+
+    places_required = int(request.form['places'])    
     if places_required > 12:
         flash("You cannot redeem more than 12 points.")
         return redirect(url_for('book', competition=competition['name'], club=club['name']))
 
+    club_points = int(club['points'])
     if places_required > club_points:
         flash("You cannot redeem more points than you have.")
         return redirect(url_for('book', competition=competition['name'], club=club['name']))
 
+    number_of_places = int(competition['numberOfPlaces'])
     if places_required > number_of_places:
         flash("You cannot book more places than left in competition.")
         return redirect(url_for('book', competition=competition['name'], club=club['name']))
     
     club['points'] = club_points - places_required
     competition['numberOfPlaces'] = number_of_places - places_required
+
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions, now=now)
 

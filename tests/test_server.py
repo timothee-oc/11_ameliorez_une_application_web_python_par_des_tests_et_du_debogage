@@ -45,6 +45,16 @@ class TestPurchasePlaces:
         assert club['points'] == 0
         assert competition['numberOfPlaces'] == 5
     
+    def test_cannot_purchase_if_club_not_found(self, client, clubs, competitions):
+        response = client.post(self.route, data={'competition': competitions[0]['name'], 'club': 'TOTO', 'places': '10'}, follow_redirects=True)
+        assert response.status_code == 200
+        assert b"Your club TOTO does not exist. Please log in." in response.data
+    
+    def test_cannot_purchase_if_competition_not_found(self, client, clubs, competitions):
+        response = client.post(self.route, data={'competition': 'TOTO', 'club': clubs[0]['name'], 'places': '10'}, follow_redirects=True)
+        assert response.status_code == 200
+        assert b"The competition TOTO does not exist." in response.data
+    
     def test_cannot_purchase_more_than_club_points(self, client, clubs, competitions):
         club = clubs[0]
         competition = competitions[0]

@@ -56,24 +56,29 @@ def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
 
-    placesRequired = int(request.form['places'])
+    places_required = int(request.form['places'])
     club_points = int(club['points'])
+    number_of_places = int(competition['numberOfPlaces'])
 
     now = datetime.now().strftime(DATE_FORMAT)
     if competition['date'] <= now:
         flash("You cannot book on a past competition.")
         return render_template('welcome.html', club=club, competitions=competitions, now=now)
-
-    if placesRequired > 12:
+    
+    if places_required > 12:
         flash("You cannot redeem more than 12 points.")
         return redirect(url_for('book', competition=competition['name'], club=club['name']))
 
-    if placesRequired > club_points:
+    if places_required > club_points:
         flash("You cannot redeem more points than you have.")
         return redirect(url_for('book', competition=competition['name'], club=club['name']))
+
+    if places_required > number_of_places:
+        flash("You cannot book more places than left in competition.")
+        return redirect(url_for('book', competition=competition['name'], club=club['name']))
     
-    club['points'] = club_points - placesRequired
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
+    club['points'] = club_points - places_required
+    competition['numberOfPlaces'] = number_of_places - places_required
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions, now=now)
 

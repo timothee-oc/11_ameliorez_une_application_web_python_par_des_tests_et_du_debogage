@@ -14,7 +14,7 @@
         <input type="hidden" name="competition" value="{{ competition['name'] }}">
         <label for="places">
             How many places?
-            <input type="number" name="places" id="" max="{{ ([club['points']|int, 12])|min }}"/>
+            <input type="number" name="places" id="" max="{{ ([competition['numberOfPlaces']|int, club['points']|int, 12])|min }}"/>
         </label>
         <button type="submit">Book</button>
     </form>

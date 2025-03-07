@@ -72,6 +72,16 @@ class TestPurchasePlaces:
         assert b"You cannot book on a past competition." in response.data
         assert int(club['points']) == 10
         assert int(competition['numberOfPlaces']) == 15
+    
+    def test_cannot_purchase_more_places_than_left_in_competition(self, client, clubs, competitions):
+        club = clubs[0]
+        competition = competitions[0]
+        competition["numberOfPlaces"] = "5"
+        response = client.post(self.route, data={'competition': competition['name'], 'club': club['name'], 'places': '10'}, follow_redirects=True)
+        assert response.status_code == 200
+        assert b"You cannot book more places than left in competition." in response.data
+        assert int(club['points']) == 10
+        assert int(competition['numberOfPlaces']) == 5
 
 class TestBook:
     def test_cannot_access_book_page_for_past_competition(self, client, clubs, competitions):

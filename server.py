@@ -37,18 +37,25 @@ def showSummary():
 
 
 @app.route('/book/<competition>/<club>')
-def book(competition,club):
+def book(competition, club):
+    try:
+        foundClub = [c for c in clubs if c['name'] == club][0]
+    except IndexError:
+        flash(f"Your club {club} does not exist. Please log in.")
+        return redirect(url_for('index'))
+
     now = datetime.now().strftime(DATE_FORMAT)
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
-    if foundClub and foundCompetition:
-        if foundCompetition['date'] <= now:
-            flash("You cannot book on a past competition.")
-            return render_template('welcome.html', club=foundClub, competitions=competitions, now=now)
-        return render_template('booking.html', club=foundClub, competition=foundCompetition)
-    else:
-        flash("Something went wrong-please try again")
+    try:
+        foundCompetition = [c for c in competitions if c['name'] == competition][0]
+    except IndexError:
+        flash(f"The competition {competition} does not exist.")
         return render_template('welcome.html', club=foundClub, competitions=competitions, now=now)
+
+    if foundCompetition['date'] <= now:
+        flash("You cannot book on a past competition.")
+        return render_template('welcome.html', club=foundClub, competitions=competitions, now=now)
+
+    return render_template('booking.html', club=foundClub, competition=foundCompetition)
 
 
 @app.route('/purchasePlaces', methods=['POST'])

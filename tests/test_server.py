@@ -84,6 +84,16 @@ class TestPurchasePlaces:
         assert int(competition['numberOfPlaces']) == 5
 
 class TestBook:
+    def test_cannot_access_book_page_for_unknown_club(self, client, clubs, competitions):
+        response = client.get(f'/book/{competitions[0]['name']}/TOTO', follow_redirects=True)
+        assert response.status_code == 200
+        assert b"Your club TOTO does not exist. Please log in." in response.data
+
+    def test_cannot_access_book_page_for_unknown_competition(self, client, clubs, competitions):
+        response = client.get(f'/book/TOTO/{clubs[0]['name']}')
+        assert response.status_code == 200
+        assert b"The competition TOTO does not exist." in response.data
+
     def test_cannot_access_book_page_for_past_competition(self, client, clubs, competitions):
         competition = competitions[0]
         competition["date"] = "1111-11-11 11:11:11"

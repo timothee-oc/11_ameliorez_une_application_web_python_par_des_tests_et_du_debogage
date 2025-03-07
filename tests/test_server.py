@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from server import app
 
@@ -21,7 +22,7 @@ def competitions():
         yield mock
 
 class TestShowSummary:
-    route = '/showSummary'
+    route = '/show_summary'
 
     def test_found_email_can_login(self, client, clubs):
         response = client.post(self.route, data={'email': clubs[0]['email']})
@@ -34,7 +35,7 @@ class TestShowSummary:
         assert b"Sorry, that email wasn't found." in response.data
 
 class TestPurchasePlaces:
-    route = '/purchasePlaces'
+    route = '/purchase_places'
 
     def test_can_purchase_respect_all_criteria(self, client, clubs, competitions):
         club = clubs[0]

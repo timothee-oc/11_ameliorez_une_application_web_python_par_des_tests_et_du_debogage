@@ -16,7 +16,7 @@ def clubs():
 
 @pytest.fixture
 def competitions():
-    competitions = [{'name': 'comp', "date": "1111-11-11 11:11:11", "numberOfPlaces": "15"}]
+    competitions = [{'name': 'comp', "date": "9999-12-31 23:59:59", "numberOfPlaces": "15"}]
     with patch('server.competitions', competitions) as mock:
         yield mock
 
@@ -60,5 +60,23 @@ class TestPurchasePlaces:
         response = client.post(self.route, data={'competition': competition['name'], 'club': club['name'], 'places': '13'}, follow_redirects=True)
         assert response.status_code == 200
         assert b"You cannot redeem more than 12 points." in response.data
-        assert int(clubs[0]['points']) == 10
+        assert int(club['points']) == 10
         assert int(competition['numberOfPlaces']) == 15
+    
+    def test_cannot_purchase_on_a_past_competition(self, client, clubs, competitions):
+        club = clubs[0]
+        competition = competitions[0]
+        competition["date"] = "1111-11-11 11:11:11"
+        response = client.post(self.route, data={'competition': competition['name'], 'club': club['name'], 'places': '10'})
+        assert response.status_code == 200
+        assert b"You cannot book on a past competition." in response.data
+        assert int(club['points']) == 10
+        assert int(competition['numberOfPlaces']) == 15
+
+class TestBook:
+    def test_cannot_access_book_page_for_past_competition(self, client, clubs, competitions):
+        competition = competitions[0]
+        competition["date"] = "1111-11-11 11:11:11"
+        response = client.get(f'/book/{competition['name']}/{clubs[0]['name']}')
+        assert response.status_code == 200
+        assert b"You cannot book on a past competition." in response.data
